@@ -24,6 +24,11 @@ class SettingsPage extends Page
 
     protected static string $view = 'filament.pages.settings-page';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->isAdmin() ?? false;
+    }
+
     public ?array $data = [];
 
     public function mount(): void

@@ -5,28 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\ExchangeClick;
 use App\Models\ExchangeOffice;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\View\View;
 
 class ExchangeDirectoryController extends Controller
 {
     public function index(): View
     {
-        $offices = ExchangeOffice::query()
-            ->where('status', ExchangeOffice::STATUS_ACTIVE)
-            ->whereNull('blocked_at')
-            ->with('exchangeRates')
-            ->orderBy('name')
-            ->get();
-
-        // Featured (هایلایت) exchanges first, then by name
-        $offices = $offices->sort(function ($a, $b) {
-            $aHighlight = is_array($a->features) && in_array('highlight', $a->features);
-            $bHighlight = is_array($b->features) && in_array('highlight', $b->features);
-            if ($aHighlight !== $bHighlight) {
-                return $aHighlight ? -1 : 1;
-            }
-            return strcmp($a->name, $b->name);
-        })->values();
+        $offices = Cache::remember('exchanges.index', 60, function () {
+            return ExchangeOffice::query()
+                ->where('status', ExchangeOffice::STATUS_ACTIVE)
+                ->whereNull('blocked_at')
+                ->with('exchangeRates')
+                ->orderByRaw("JSON_CONTAINS(COALESCE(features, '[]'), '\"highlight\"') DESC")
+                ->orderBy('name')
+                ->get();
+        });
 
         return view('exchanges.index', compact('offices'));
     }
@@ -37,7 +31,7 @@ class ExchangeDirectoryController extends Controller
             abort(404);
         }
 
-        $this->recordClick($exchangeOffice, ExchangeClick::TYPE_VIEW);
+        $this->recordClickAfterResponse($exchangeOffice, ExchangeClick::TYPE_VIEW);
         $exchangeOffice->load('exchangeRates');
 
         $effectiveLandingTheme = $exchangeOffice->landing_theme
@@ -62,14 +56,18 @@ class ExchangeDirectoryController extends Controller
         if (! in_array($type, [ExchangeClick::TYPE_VIEW, ExchangeClick::TYPE_CALL, ExchangeClick::TYPE_MAP], true)) {
             $type = ExchangeClick::TYPE_VIEW;
         }
-        $this->recordClick($exchangeOffice, $type);
+        $this->recordClickAfterResponse($exchangeOffice, $type);
 
         return response()->json(['ok' => true]);
     }
 
-    protected function recordClick(ExchangeOffice $office, string $type): void
+    /** Defer click recording until after response is sent for faster page load. */
+    protected function recordClickAfterResponse(ExchangeOffice $office, string $type): void
     {
-        $office->increment('clicks');
-        $office->exchangeClicks()->create(['event_type' => $type]);
+        $officeId = $office->id;
+        app()->terminating(function () use ($officeId, $type) {
+            ExchangeOffice::whereKey($officeId)->increment('clicks');
+            ExchangeClick::create(['exchange_office_id' => $officeId, 'event_type' => $type]);
+        });
     }
 }

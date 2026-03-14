@@ -69,6 +69,25 @@ php artisan make:filament-user
 
 ---
 
+## بهینه‌سازی برای تولید (توصیه می‌شود)
+
+پس از نصب، برای سرعت بیشتر در محیط production اجرا کنید:
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+یا یک‌جا:
+```bash
+php artisan optimize
+```
+
+**توجه:** اگر route یا config را تغییر دادید، دوباره `optimize` را اجرا کنید. برای پاک کردن کش: `php artisan optimize:clear`.
+
+---
+
 ## رفع مشکلات متداول
 
 - **۵۰۰ Error:** مجوزها را بررسی کنید: `storage` و `bootstrap/cache` باید قابل نوشتن باشند (۷۵۵ یا ۷۷۵).

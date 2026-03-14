@@ -47,7 +47,7 @@ class UserDashboardController extends Controller
         }
 
         return view('dashboard.onboarding.step1', [
-            'onboardingFields' => OnboardingField::ordered()->get(),
+            'onboardingFields' => OnboardingField::getCachedOrdered(),
         ]);
     }
 
@@ -58,7 +58,7 @@ class UserDashboardController extends Controller
             return redirect()->route('dashboard.index')->with('info', 'شما قبلاً یک صرافی تأیید‌شده دارید. امکان ثبت صرافی جدید وجود ندارد.');
         }
 
-        $fields = OnboardingField::ordered()->get();
+        $fields = OnboardingField::getCachedOrdered();
         if ($fields->isEmpty()) {
             return redirect()->route('dashboard.onboarding')->with('info', 'در حال حاضر فرم ثبت صرافی غیرفعال است. لطفاً با مدیر تماس بگیرید.');
         }

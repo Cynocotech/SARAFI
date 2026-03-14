@@ -134,14 +134,37 @@ class ExchangeOffice extends Model implements AuthenticatableContract
         return $this->belongsTo(Plan::class);
     }
 
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget('exchanges.index'));
+        static::deleted(fn () => Cache::forget('exchanges.index'));
+    }
+
+    /** @internal Memoized per request to avoid duplicate queries. */
+    protected bool $_currentPlanComputed = false;
+
+    protected ?Plan $_cachedCurrentPlan = null;
+
+    /** @internal Memoized per request. */
+    protected bool $_subscriptionEndDateComputed = false;
+
+    protected ?\Carbon\Carbon $_cachedSubscriptionEndDate = null;
+
     /** Current plan (assigned by admin or from latest paid transaction). */
     public function getCurrentPlan(): ?Plan
     {
-        if ($this->plan_id) {
-            return $this->relationLoaded('plan') ? $this->plan : $this->plan()->first();
+        if ($this->_currentPlanComputed) {
+            return $this->_cachedCurrentPlan;
         }
-        $tx = $this->transactions()->whereNotNull('paid_at')->with('plan')->latest('paid_at')->first();
-        return $tx?->plan;
+        $this->_currentPlanComputed = true;
+        if ($this->plan_id) {
+            $this->_cachedCurrentPlan = $this->relationLoaded('plan') ? $this->plan : $this->plan()->first();
+        } else {
+            $tx = $this->transactions()->whereNotNull('paid_at')->with('plan')->latest('paid_at')->first();
+            $this->_cachedCurrentPlan = $tx?->plan;
+        }
+
+        return $this->_cachedCurrentPlan;
     }
 
     /** Whether this office can use digital signage (has purchased a plan with the feature). */
@@ -157,16 +180,22 @@ class ExchangeOffice extends Model implements AuthenticatableContract
      */
     public function getSubscriptionEndDate(): ?\Carbon\Carbon
     {
+        if ($this->_subscriptionEndDateComputed) {
+            return $this->_cachedSubscriptionEndDate;
+        }
+        $this->_subscriptionEndDateComputed = true;
+        $plan = $this->getCurrentPlan();
         $tx = $this->transactions()->whereNotNull('paid_at')->with('plan')->latest('paid_at')->first();
         if (! $tx || ! $tx->paid_at || ! $tx->plan) {
-            return null;
+            return $this->_cachedSubscriptionEndDate = null;
         }
         $months = (int) $tx->plan->interval;
         if ($months <= 0) {
             $months = 1;
         }
+        $this->_cachedSubscriptionEndDate = $tx->paid_at->copy()->addMonths($months);
 
-        return $tx->paid_at->copy()->addMonths($months);
+        return $this->_cachedSubscriptionEndDate;
     }
 
     /**

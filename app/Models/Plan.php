@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 class Plan extends Model
 {
@@ -110,6 +111,17 @@ class Plan extends Model
     public function scopeOrdered($query)
     {
         return $query->orderBy('sort_order')->orderBy('id');
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget('plans.active_ordered'));
+    }
+
+    /** Cached active plans (5 min) for subscription pages and admin forms. */
+    public static function getCachedActiveOrdered()
+    {
+        return Cache::remember('plans.active_ordered', 300, fn () => static::active()->ordered()->get());
     }
 
     public function transactions(): HasMany

@@ -157,7 +157,7 @@ class ExchangeOfficeResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('plan_id')
                             ->label('پلن فعلی')
-                            ->options(fn () => Plan::active()->ordered()->get()->mapWithKeys(fn (Plan $p) => [$p->id => $p->name_fa ?: $p->name])->all())
+                            ->options(fn () => Plan::getCachedActiveOrdered()->mapWithKeys(fn (Plan $p) => [$p->id => $p->name_fa ?: $p->name])->all())
                             ->searchable()
                             ->nullable()
                             ->placeholder('پلنی اختصاص داده نشده'),

@@ -86,7 +86,7 @@ Route::middleware(['web', 'auth.exchange'])->prefix('dashboard')->name('dashboar
     Route::get('/password', [UserDashboardController::class, 'showPasswordForm'])->name('password');
     Route::post('/password', [UserDashboardController::class, 'updatePassword'])->name('password.update');
     Route::get('/subscription', function () {
-        $plans = Plan::active()->ordered()->get();
+        $plans = Plan::getCachedActiveOrdered();
         $plansJson = $plans->isEmpty()
             ? new \stdClass()
             : $plans->keyBy('id')->map(function ($p) {
