@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('recorded_at');
             $table->timestamps();
 
-            $table->index(['exchange_office_id', 'from_currency', 'to_currency', 'recorded_at']);
+            $table->index(['exchange_office_id', 'from_currency', 'to_currency', 'recorded_at'], 'exrate_hist_office_curr_idx');
         });
 
         $this->backfillFromCurrentRates();
