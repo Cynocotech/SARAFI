@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminTwoFactorController;
 use App\Http\Controllers\ExchangeLoginController;
 use App\Http\Controllers\ExchangeTwoFactorController;
 use App\Http\Controllers\ImpersonateExchangeController;
+use App\Http\Controllers\InstallController;
 use App\Http\Controllers\StripeCheckoutController;
 use App\Http\Controllers\UserDashboardController;
 use App\Http\Controllers\ExchangeDirectoryController;
@@ -14,6 +15,15 @@ use App\Http\Controllers\DigitalSignageController;
 use App\Http\Controllers\SignageDisplayController;
 use App\Models\Plan;
 use Illuminate\Support\Facades\Route;
+
+// Installation wizard (only accessible when not installed)
+Route::prefix('install')->name('install.')->group(function () {
+    Route::get('/', fn () => redirect()->route('install.requirements'));
+    Route::get('/requirements', [InstallController::class, 'requirements'])->name('requirements');
+    Route::get('/database', [InstallController::class, 'database'])->name('database');
+    Route::post('/process', [InstallController::class, 'process'])->name('process');
+    Route::get('/complete', [InstallController::class, 'complete'])->name('complete');
+});
 
 Route::get('/', function () {
     return redirect()->route('exchanges.index');

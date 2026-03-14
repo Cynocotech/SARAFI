@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'stripe/webhook',
         ]);
+        $middleware->prependToGroup('web', \App\Http\Middleware\RedirectToInstaller::class);
         $middleware->alias([
             'auth.exchange' => \App\Http\Middleware\RedirectIfNotExchange::class,
         ]);
