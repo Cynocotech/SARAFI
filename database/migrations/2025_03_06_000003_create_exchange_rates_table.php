@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('margin', 10, 4)->nullable();
             $table->timestamps();
 
-            $table->unique(['exchange_office_id', 'from_currency', 'to_currency']);
+            $table->unique(['exchange_office_id', 'from_currency', 'to_currency'], 'exrates_office_curr_unique');
             $table->index(['from_currency', 'to_currency']);
         });
     }
