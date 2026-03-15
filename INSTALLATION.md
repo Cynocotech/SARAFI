@@ -88,6 +88,47 @@ php artisan optimize
 
 ---
 
+## به‌روزرسانی پروژه روی سرور (Pull)
+
+### روش ۱: SSH و Git (توصیه شده)
+
+اگر روی سرور repo را clone کرده‌اید:
+
+```bash
+cd /home/iraniu/SARAFI   # یا مسیر پروژه
+git pull origin main     # یا نام branch شما
+
+composer install --no-dev
+php artisan migrate --force
+php artisan optimize
+```
+
+اگر migration جدید دارید، `migrate --force` لازم است. اگر config یا route عوض شده، `php artisan optimize:clear` و بعد دوباره `php artisan optimize` بزنید.
+
+### روش ۲: بدون SSH (cPanel File Manager)
+
+1. روی کامپیوتر خودتان کد را از Git بگیرید و ZIP کنید.
+2. در cPanel → **File Manager** به پوشه پروژه بروید.
+3. فایل‌های جدید را آپلود کنید (یا ZIP را Extract کنید و جایگزین کنید).
+4. **مهم:** فایل `.env` را بازنویسی نکنید — فقط فایل‌های کد را عوض کنید.
+5. اگر migration دارید، از **Terminal** در cPanel (اگر هست) اجرا کنید:
+   ```bash
+   cd ~/SARAFI && php artisan migrate --force
+   ```
+
+### روش ۳: cPanel Git Version Control
+
+اگر در cPanel از **Git Version Control** استفاده می‌کنید:
+
+1. cPanel → **Git Version Control** → Repositories
+2. repo مورد نظر را انتخاب کنید → **Pull or Deploy**
+3. بعد از pull، از Terminal اجرا کنید:
+   ```bash
+   cd /path/to/repo && composer install --no-dev && php artisan migrate --force
+   ```
+
+---
+
 ## رفع مشکلات متداول
 
 - **۵۰۰ Error:** مجوزها را بررسی کنید: `storage` و `bootstrap/cache` باید قابل نوشتن باشند (۷۵۵ یا ۷۷۵).
