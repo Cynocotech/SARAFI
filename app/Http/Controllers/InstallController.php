@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password;
 
@@ -18,16 +17,12 @@ class InstallController extends Controller
      */
     public static function isInstalled(): bool
     {
-        $installedFile = storage_path('installed');
-        if (File::exists($installedFile)) {
+        if (File::exists(storage_path('installed'))) {
             return true;
         }
-        $envPath = base_path('.env');
-        if (! File::exists($envPath)) {
-            return false;
-        }
-        $key = trim(env('APP_KEY', ''));
-        return ! empty($key);
+
+        // APP_KEY from .env (local) or container/orchestrator environment (Docker, Dokploy, etc.)
+        return trim((string) env('APP_KEY', '')) !== '';
     }
 
     /**
@@ -93,7 +88,7 @@ class InstallController extends Controller
             );
         } catch (\PDOException $e) {
             return back()->withInput()->withErrors([
-                'db_database' => 'Database connection failed: ' . $e->getMessage(),
+                'db_database' => 'Database connection failed: '.$e->getMessage(),
             ]);
         }
 
@@ -121,14 +116,14 @@ class InstallController extends Controller
         ];
         foreach ($sets as $key => $value) {
             $escaped = $key === 'DB_PASSWORD' && (str_contains($value, '$') || str_contains($value, '"'))
-                ? '"' . addslashes($value) . '"'
+                ? '"'.addslashes($value).'"'
                 : $value;
-            $pattern = '/^(#\s*)?' . preg_quote($key, '/') . '=.*/m';
+            $pattern = '/^(#\s*)?'.preg_quote($key, '/').'=.*/m';
             $replacement = "{$key}={$escaped}";
             $envContent = preg_replace($pattern, $replacement, $envContent, 1);
         }
         if (! preg_match('/^APP_KEY=base64:[A-Za-z0-9+\/=]{40,}/m', $envContent)) {
-            $key = 'base64:' . base64_encode(Str::random(32));
+            $key = 'base64:'.base64_encode(Str::random(32));
             $envContent = preg_replace('/^APP_KEY=.*/m', "APP_KEY={$key}", $envContent, 1);
             if (! str_contains($envContent, "APP_KEY={$key}")) {
                 $envContent .= "\nAPP_KEY={$key}\n";
@@ -149,7 +144,7 @@ class InstallController extends Controller
             Artisan::call('migrate', ['--force' => true]);
         } catch (\Throwable $e) {
             return back()->withInput()->withErrors([
-                'db_database' => 'Migration failed: ' . $e->getMessage(),
+                'db_database' => 'Migration failed: '.$e->getMessage(),
             ]);
         }
 
@@ -177,7 +172,7 @@ class InstallController extends Controller
             ]);
         } catch (\Throwable $e) {
             return back()->withInput()->withErrors([
-                'admin_email' => 'Failed to create admin: ' . $e->getMessage(),
+                'admin_email' => 'Failed to create admin: '.$e->getMessage(),
             ]);
         }
 

@@ -8,8 +8,8 @@ use App\Services\TwoFactorService;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 use PragmaRX\Google2FA\Google2FA;
 use Stripe\StripeClient;
 
@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
                     'Stripe API key is not set. Configure it in Admin → تنظیمات سیستم (Stripe) or add STRIPE_SECRET to .env.'
                 );
             }
+
             return new StripeClient($secret);
         });
 
@@ -51,7 +52,16 @@ class AppServiceProvider extends ServiceProvider
             }
             if (! is_array($navItems) || empty($navItems)) {
                 $navItems = [
-                    ['label' => 'ثبت صرافی خود', 'route_name' => 'dashboard.onboarding'],
+                    ['label' => 'راهنما', 'route_name' => 'guide'],
+                    ['label' => 'تماس', 'route_name' => 'contact'],
+                ];
+            }
+            $navItems = array_values(array_filter(
+                $navItems,
+                fn ($item): bool => is_array($item) && ($item['route_name'] ?? '') !== 'dashboard.onboarding'
+            ));
+            if ($navItems === []) {
+                $navItems = [
                     ['label' => 'راهنما', 'route_name' => 'guide'],
                     ['label' => 'تماس', 'route_name' => 'contact'],
                 ];
@@ -61,7 +71,10 @@ class AppServiceProvider extends ServiceProvider
 
         View::composer('layouts.app', function ($view) {
             $isLanding = request()->routeIs('exchanges.show');
-            $exchangeTheme = (request()->routeIs('exchanges.index') || $isLanding)
+            $usesPublicDirectoryChrome = request()->routeIs('exchanges.index')
+                || request()->routeIs('guide')
+                || request()->routeIs('contact');
+            $exchangeTheme = ($usesPublicDirectoryChrome || $isLanding)
                 ? (Setting::get('exchange_theme') ?: 'default')
                 : 'default';
             $exchangeLandingTheme = Setting::get('exchange_landing_theme') ?: 'default';

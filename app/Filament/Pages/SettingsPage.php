@@ -7,8 +7,8 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
-use Filament\Pages\Page;
 use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Pages\Page;
 
 class SettingsPage extends Page
 {
@@ -40,7 +40,16 @@ class SettingsPage extends Page
         }
         if (! is_array($navItems) || empty($navItems)) {
             $navItems = [
-                ['label' => 'ثبت صرافی خود', 'route_name' => 'dashboard.onboarding'],
+                ['label' => 'راهنما', 'route_name' => 'guide'],
+                ['label' => 'تماس', 'route_name' => 'contact'],
+            ];
+        }
+        $navItems = array_values(array_filter(
+            $navItems,
+            fn ($item): bool => is_array($item) && ($item['route_name'] ?? '') !== 'dashboard.onboarding'
+        ));
+        if ($navItems === []) {
+            $navItems = [
                 ['label' => 'راهنما', 'route_name' => 'guide'],
                 ['label' => 'تماس', 'route_name' => 'contact'],
             ];
@@ -143,7 +152,7 @@ class SettingsPage extends Page
                                     ->maxLength(255),
                                 \Filament\Forms\Components\TextInput::make('route_name')
                                     ->label('نام مسیر (Route)')
-                                    ->placeholder('مثال: guide یا dashboard.onboarding')
+                                    ->placeholder('مثال: guide یا contact')
                                     ->required()
                                     ->maxLength(64),
                             ])
@@ -208,7 +217,11 @@ class SettingsPage extends Page
             Setting::set('exchange_landing_theme', $state['exchange_landing_theme'] ?? 'default');
         }
         if (array_key_exists('nav_items', $state) && is_array($state['nav_items'])) {
-            Setting::set('nav_items', $state['nav_items']);
+            $navItems = array_values(array_filter(
+                $state['nav_items'],
+                fn ($item): bool => is_array($item) && ($item['route_name'] ?? '') !== 'dashboard.onboarding'
+            ));
+            Setting::set('nav_items', $navItems);
         }
         if (array_key_exists('guide_title', $state)) {
             Setting::set('guide_title', $state['guide_title'] ?? '');

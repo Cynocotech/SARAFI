@@ -17,9 +17,18 @@ class ExchangeDirectoryController extends Controller
                 ->where('status', ExchangeOffice::STATUS_ACTIVE)
                 ->whereNull('blocked_at')
                 ->with('exchangeRates')
-                ->orderByRaw("JSON_CONTAINS(COALESCE(features, '[]'), '\"highlight\"') DESC")
                 ->orderBy('name')
-                ->get();
+                ->get()
+                ->sort(function (ExchangeOffice $a, ExchangeOffice $b): int {
+                    $aHighlight = in_array('highlight', $a->features ?? [], true);
+                    $bHighlight = in_array('highlight', $b->features ?? [], true);
+                    if ($aHighlight !== $bHighlight) {
+                        return $bHighlight <=> $aHighlight;
+                    }
+
+                    return strcasecmp((string) $a->name, (string) $b->name);
+                })
+                ->values();
         });
 
         return view('exchanges.index', compact('offices'));
