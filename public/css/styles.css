@@ -2548,6 +2548,11 @@ body.page-exchange-landing .app {
   display: none !important;
 }
 
+/* Defensive: if converter is visible, always hide directory list (JS fallback) */
+#converterSection:not([hidden]) ~ #directoryList {
+  display: none !important;
+}
+
 /* Hero slider - sponsored exchanges */
 .converter-hero-slider {
   margin-bottom: 1.25rem;
