@@ -38,7 +38,6 @@ class ClicksAnalyticsWidget extends BaseWidget
         return [
             Stat::make('کلیک‌های امروز', $todayClicks)
                 ->description('جمع همه‌ی رویدادها (view/call/map)')
-                ->icon('heroicon-o-cursor-arrow-2-right')
                 ->color('primary'),
             Stat::make('تماس‌های امروز', $todayCalls)
                 ->description('رویداد: call')
