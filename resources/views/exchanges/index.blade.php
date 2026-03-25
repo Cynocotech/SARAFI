@@ -574,12 +574,18 @@
       if (section === 'converter') {
         converterSection.hidden = false;
         directoryList.hidden = true;
+        directoryList.setAttribute('hidden', '');
+        directoryList.style.display = 'none';
+        converterSection.style.display = 'block';
         if (converterToolbar) converterToolbar.hidden = false;
         if (exchangesToolbar) exchangesToolbar.hidden = true;
         runConverter();
       } else {
         converterSection.hidden = true;
         directoryList.hidden = false;
+        directoryList.removeAttribute('hidden');
+        directoryList.style.display = '';
+        converterSection.style.display = '';
         if (converterToolbar) converterToolbar.hidden = true;
         if (exchangesToolbar) exchangesToolbar.hidden = false;
       }
