@@ -3150,8 +3150,8 @@ body.page-exchange-landing .app {
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  height: auto;
   max-height: min(92vh, 100dvh);
+  height: min(92vh, 100dvh);
   background: var(--bg-card);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
