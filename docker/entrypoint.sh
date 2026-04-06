@@ -2,35 +2,20 @@
 set -e
 cd /var/www/html
 
-# ── 1. Wait for MySQL ────────────────────────────────────────────────────────
-if [ -n "$DB_HOST" ] && [ "${DB_CONNECTION:-mysql}" != "sqlite" ]; then
-  echo "[entrypoint] Waiting for MySQL at ${DB_HOST}:${DB_PORT:-3306}..."
-  i=0
-  while [ "$i" -lt 60 ]; do
-    if php -r "
-      try {
-        new PDO(
-          'mysql:host='.getenv('DB_HOST').';port='.(getenv('DB_PORT')?:'3306'),
-          getenv('DB_USERNAME')?:'root',
-          getenv('DB_PASSWORD')?:'',
-          [PDO::ATTR_TIMEOUT => 2]
-        );
-        exit(0);
-      } catch (Throwable \$e) { exit(1); }
-    " 2>/dev/null; then
-      echo "[entrypoint] Database is reachable."
-      break
-    fi
-    i=$((i + 1))
-    sleep 2
-  done
+# ── 1. Ensure SQLite file exists and is writable ─────────────────────────────
+if [ "${DB_CONNECTION:-sqlite}" = "sqlite" ]; then
+  DB_FILE="${DB_DATABASE:-/var/www/html/database/database.sqlite}"
+  mkdir -p "$(dirname "$DB_FILE")"
+  touch "$DB_FILE"
+  chown www-data:www-data "$DB_FILE"
+  chmod 664 "$DB_FILE"
+  echo "[entrypoint] SQLite database: $DB_FILE"
 fi
 
 # ── 2. Storage symlink ───────────────────────────────────────────────────────
 php artisan storage:link 2>/dev/null || true
 
 # ── 3. Migrations ────────────────────────────────────────────────────────────
-# Set RUN_MIGRATIONS=false on replica containers (only one container should migrate).
 if [ "${RUN_MIGRATIONS:-true}" = "true" ]; then
   echo "[entrypoint] Running migrations..."
   php artisan migrate --force --no-interaction

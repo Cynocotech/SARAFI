@@ -21,9 +21,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libzip-dev \
         libicu-dev \
         libonig-dev \
+        libsqlite3-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" \
-        pdo_mysql \
+        pdo_sqlite \
         mbstring \
         exif \
         pcntl \
@@ -42,7 +43,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www/html
 ENV COMPOSER_ALLOW_SUPERUSER=1
 
-# Install PHP dependencies (no dev, no scripts yet)
+# Install PHP dependencies
 COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-interaction --prefer-dist --optimize-autoloader
 
@@ -52,7 +53,7 @@ COPY . .
 # Bring in compiled frontend assets from stage 1
 COPY --from=frontend /app/public/build ./public/build
 
-# Finalise composer (dump autoload with full app present)
+# Finalise composer
 RUN composer dump-autoload --optimize --classmap-authoritative
 
 # Web server & process manager config
@@ -64,9 +65,11 @@ COPY docker/supervisord.conf  /etc/supervisor/conf.d/supervisord.conf
 COPY docker/entrypoint.sh     /usr/local/bin/entrypoint.sh
 
 RUN chmod +x /usr/local/bin/entrypoint.sh \
-    && mkdir -p storage/framework/{sessions,views,cache/data} storage/logs bootstrap/cache \
-    && chown -R www-data:www-data storage bootstrap/cache public/build \
-    && chmod -R ug+rwx storage bootstrap/cache
+    # Create SQLite database file with correct ownership
+    && mkdir -p database storage/framework/{sessions,views,cache/data} storage/logs bootstrap/cache \
+    && touch database/database.sqlite \
+    && chown -R www-data:www-data database storage bootstrap/cache public/build \
+    && chmod -R ug+rwx database storage bootstrap/cache
 
 EXPOSE 80
 
