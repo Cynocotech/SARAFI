@@ -106,6 +106,7 @@ class DigitalSignageController extends Controller
             'remove_background_image' => ['nullable', 'boolean'],
             'crypto_enabled' => ['nullable', 'boolean'],
             'qr_link' => ['nullable', 'string', 'max:500'],
+            'rotation' => ['nullable', 'integer', 'in:0,90,180,270'],
         ]);
 
         $screen->update([
@@ -113,6 +114,7 @@ class DigitalSignageController extends Controller
             'background_color' => $validated['background_color'] ?? $screen->background_color,
             'crypto_enabled' => $request->boolean('crypto_enabled'),
             'qr_link' => (filled($validated['qr_link'] ?? null) && filter_var($validated['qr_link'], FILTER_VALIDATE_URL)) ? $validated['qr_link'] : null,
+            'rotation' => isset($validated['rotation']) ? (int) $validated['rotation'] : ($screen->rotation ?? 0),
         ]);
 
         if (! empty($validated['remove_background_image'])) {

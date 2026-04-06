@@ -6,9 +6,7 @@
   <meta name="theme-color" content="#f0f9ff">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'پنل ادمین')</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
   <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
   <style>
     body { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 1.5rem; font-family: Vazirmatn, sans-serif; }

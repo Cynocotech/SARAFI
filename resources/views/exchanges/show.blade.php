@@ -3,7 +3,7 @@
 @section('meta_description', Str::limit(strip_tags($exchangeOffice->about ?? $exchangeOffice->name . ' - نرخ خرید و فروش ارز'), 160))
 @section('styles')
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  {{-- Material Symbols (icon font) loaded locally if needed --}}
   <link href="{{ asset('css/sarafi-landing.css') }}" rel="stylesheet">
 @endsection
 @section('body_start')

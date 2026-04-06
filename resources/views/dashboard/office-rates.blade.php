@@ -12,8 +12,8 @@
       @endif
 
       <div class="dash-card">
-        <h2 style="font-size:1.1rem;margin-bottom:1rem;color:var(--text);">نرخ ویژه امروز</h2>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">نرخ ویژه در لیست صرافی‌ها، صفحه جزئیات و صفحه نمایش (تلویزیون) به صورت بنر «نرخ ویژه امروز» نمایش داده می‌شود. انتخاب کنید نرخ ویژه برای خرید، فروش یا هر دو باشد.</p>
+        <h2>نرخ ویژه امروز</h2>
+        <p>نرخ ویژه در لیست صرافی‌ها، صفحه جزئیات و صفحه نمایش (تلویزیون) به صورت بنر «نرخ ویژه امروز» نمایش داده می‌شود. انتخاب کنید نرخ ویژه برای خرید، فروش یا هر دو باشد.</p>
         <form action="{{ route('dashboard.special-rate.update', $office) }}" method="POST" class="onboarding-form" id="specialRateForm">
           @csrf
           @method('PUT')
@@ -22,33 +22,33 @@
             $hasSell = $office->special_rate_sell !== null && $office->special_rate_sell != '';
             $specialRateOption = old('special_rate_option', $hasBuy && $hasSell ? 'both' : ($hasSell ? 'sell' : 'buy'));
           @endphp
-          <div class="form-group" style="margin-bottom:1rem;">
-            <label style="display:block;font-weight:600;margin-bottom:0.5rem;">نرخ ویژه برای</label>
-            <div style="display:flex;flex-wrap:wrap;gap:0.75rem;">
-              <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+          <div class="form-group">
+            <label>نرخ ویژه برای</label>
+            <div style="display:flex;flex-wrap:wrap;gap:0.65rem;margin-top:0.25rem;">
+              <label class="rate-radio-label">
                 <input type="radio" name="special_rate_option" value="buy" {{ $specialRateOption === 'buy' ? 'checked' : '' }} class="special-rate-option-input">
                 <span>خرید</span>
               </label>
-              <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <label class="rate-radio-label">
                 <input type="radio" name="special_rate_option" value="sell" {{ $specialRateOption === 'sell' ? 'checked' : '' }} class="special-rate-option-input">
                 <span>فروش</span>
               </label>
-              <label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer;">
+              <label class="rate-radio-label">
                 <input type="radio" name="special_rate_option" value="both" {{ $specialRateOption === 'both' ? 'checked' : '' }} class="special-rate-option-input">
                 <span>خرید و فروش</span>
               </label>
             </div>
           </div>
-          <div class="form-row special-rate-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-            <div class="form-group special-rate-buy-wrap" style="{{ $specialRateOption === 'sell' ? 'display:none;' : '' }}">
-              <label for="special_rate_buy">نرخ خرید ویژه (تومان)</label>
+          <div class="price-row special-rate-fields">
+            <div class="price-box buy special-rate-buy-wrap" style="{{ $specialRateOption === 'sell' ? 'display:none;' : '' }}">
+              <div class="label">نرخ خرید ویژه (تومان)</div>
               <input type="number" id="special_rate_buy" name="special_rate_buy" value="{{ old('special_rate_buy', $office->special_rate_buy) }}" min="0" step="1" placeholder="خالی = غیرفعال">
-              @error('special_rate_buy')<p class="text-danger" style="font-size:0.85rem;margin-top:0.25rem;">{{ $message }}</p>@enderror
+              @error('special_rate_buy')<p class="text-danger" style="font-size:0.85rem;margin-top:0.35rem;">{{ $message }}</p>@enderror
             </div>
-            <div class="form-group special-rate-sell-wrap" style="{{ $specialRateOption === 'buy' ? 'display:none;' : '' }}">
-              <label for="special_rate_sell">نرخ فروش ویژه (تومان)</label>
+            <div class="price-box sell special-rate-sell-wrap" style="{{ $specialRateOption === 'buy' ? 'display:none;' : '' }}">
+              <div class="label">نرخ فروش ویژه (تومان)</div>
               <input type="number" id="special_rate_sell" name="special_rate_sell" value="{{ old('special_rate_sell', $office->special_rate_sell) }}" min="0" step="1" placeholder="خالی = غیرفعال">
-              @error('special_rate_sell')<p class="text-danger" style="font-size:0.85rem;margin-top:0.25rem;">{{ $message }}</p>@enderror
+              @error('special_rate_sell')<p class="text-danger" style="font-size:0.85rem;margin-top:0.35rem;">{{ $message }}</p>@enderror
             </div>
           </div>
           <script>
@@ -88,31 +88,31 @@
       </div>
 
       <div class="dash-card">
-        <h2 style="font-size:1.1rem;margin-bottom:0.5rem;color:var(--text);">پرداخت با</h2>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">روش‌های پرداختی که در صرافی می‌پذیرید را انتخاب کنید. در کارت صرافی و صفحه جزئیات با لوگو نمایش داده می‌شوند.</p>
+        <h2>پرداخت با</h2>
+        <p>روش‌های پرداختی که در صرافی می‌پذیرید را انتخاب کنید. در کارت صرافی و صفحه جزئیات با لوگو نمایش داده می‌شوند.</p>
         <form action="{{ route('dashboard.payment-methods.update', $office) }}" method="POST" class="onboarding-form">
           @csrf
           @method('PUT')
-          <div style="display:flex;flex-wrap:wrap;gap:1rem 1.5rem;">
+          <div style="display:flex;flex-wrap:wrap;gap:0.75rem 1rem;">
             @foreach(\App\Models\ExchangeOffice::paymentMethodOptions() as $key => $label)
-              <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;padding:0.5rem 0.75rem;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg-elevated);">
+              <label class="payment-method-check">
                 <input type="checkbox" name="payment_methods[]" value="{{ $key }}" {{ in_array($key, $office->payment_methods ?? [], true) ? 'checked' : '' }}>
-                @include('partials.payment-method-logo', ['key' => $key, 'size' => 28])
+                @include('partials.payment-method-logo', ['key' => $key, 'size' => 32])
                 <span>{{ $label }}</span>
               </label>
             @endforeach
           </div>
-          <button type="submit" class="btn btn-primary" style="margin-top:0.75rem;">ذخیره</button>
+          <button type="submit" class="btn btn-primary" style="margin-top:1.25rem;">ذخیره</button>
         </form>
       </div>
 
       <div class="dash-card">
-        <h2 style="font-size:1.1rem;margin-bottom:0.5rem;color:var(--text);">کارمزد حواله</h2>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:1rem;">در صورت تمایل کارمزد حواله برای مبالغ زیر یک حد مشخص (مثلاً زیر ۱۰۰۰ پوند) را وارد کنید. هر دو فیلد را پر کنید تا در کارت صرافی و صفحه جزئیات نمایش داده شود.</p>
+        <h2>کارمزد حواله</h2>
+        <p>در صورت تمایل کارمزد حواله برای مبالغ زیر یک حد مشخص (مثلاً زیر ۱۰۰۰ پوند) را وارد کنید. هر دو فیلد را پر کنید تا در کارت صرافی و صفحه جزئیات نمایش داده شود.</p>
         <form action="{{ route('dashboard.transfer-fee.update', $office) }}" method="POST" class="onboarding-form">
           @csrf
           @method('PUT')
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;">
             <div class="form-group">
               <label for="transfer_fee_under_amount">برای حواله زیر (پوند)</label>
               <input type="number" id="transfer_fee_under_amount" name="transfer_fee_under_amount" value="{{ old('transfer_fee_under_amount', $office->transfer_fee_under_amount) }}" min="0" step="1" placeholder="مثال: 1000">
@@ -129,31 +129,38 @@
       </div>
 
       <div class="dash-card">
+        <h2>ثبت نرخ جدید — پوند به تومان</h2>
         <form action="{{ route('dashboard.office-rates.store', $office) }}" method="POST" class="onboarding-form">
           @csrf
           <input type="hidden" name="from_currency" value="GBP">
           <input type="hidden" name="to_currency" value="IRR">
-          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
-            <div class="form-group">
-              <label for="buy_rate">نرخ خرید (تومان)</label>
+          <div class="price-row">
+            <div class="price-box buy">
+              <div class="label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="vertical-align:-2px;margin-left:4px;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+                نرخ خرید (تومان)
+              </div>
               <input type="number" id="buy_rate" name="buy_rate" value="{{ old('buy_rate') }}" min="0" step="1" required placeholder="مثال: 85000">
-              @error('buy_rate')<p class="text-danger" style="font-size:0.85rem;margin-top:0.25rem;">{{ $message }}</p>@enderror
+              @error('buy_rate')<p class="text-danger" style="font-size:0.82rem;margin-top:0.35rem;">{{ $message }}</p>@enderror
             </div>
-            <div class="form-group">
-              <label for="sell_rate">نرخ فروش (تومان)</label>
+            <div class="price-box sell">
+              <div class="label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" style="vertical-align:-2px;margin-left:4px;"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/></svg>
+                نرخ فروش (تومان)
+              </div>
               <input type="number" id="sell_rate" name="sell_rate" value="{{ old('sell_rate') }}" min="0" step="1" required placeholder="مثال: 86500">
-              @error('sell_rate')<p class="text-danger" style="font-size:0.85rem;margin-top:0.25rem;">{{ $message }}</p>@enderror
+              @error('sell_rate')<p class="text-danger" style="font-size:0.82rem;margin-top:0.35rem;">{{ $message }}</p>@enderror
             </div>
           </div>
           @error('from_currency')<p class="text-danger" style="font-size:0.85rem;margin-top:0.25rem;">{{ $message }}</p>@enderror
-          <button type="submit" class="btn btn-primary btn-block" style="margin-top:0.5rem;">افزودن نرخ</button>
+          <button type="submit" class="btn btn-primary btn-block" style="margin-top:0.75rem;">افزودن نرخ</button>
         </form>
       </div>
 
       <div class="dash-card span-full">
-        <h2 style="font-size:1.1rem;margin-bottom:1rem;color:var(--text);">نرخ‌های فعلی</h2>
+        <h2>نرخ‌های فعلی</h2>
         @if($office->exchangeRates->isEmpty())
-          <p style="color:var(--text-muted);font-size:0.9rem;">هنوز نرخی ثبت نشده است. با فرم بالا یک نرخ پوند به تومان اضافه کنید.</p>
+          <p>هنوز نرخی ثبت نشده است. با فرم بالا یک نرخ پوند به تومان اضافه کنید.</p>
         @else
           <div style="overflow-x:auto;">
             <table style="width:100%;border-collapse:collapse;font-size:0.9rem;">
@@ -186,17 +193,17 @@
                         <form action="{{ route('dashboard.rates.update', $rate) }}" method="POST">
                           @csrf
                           @method('PUT')
-                          <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr auto;gap:0.75rem;align-items:end;">
-                            <div class="form-group" style="margin:0;">
-                              <label>خرید</label>
-                              <input type="number" name="buy_rate" value="{{ old('buy_rate', $rate->buy_rate) }}" min="0" step="1" required>
+                          <div class="price-row" style="margin-bottom:0.75rem;">
+                            <div class="price-box buy">
+                              <div class="label">نرخ خرید (تومان)</div>
+                              <input type="number" name="buy_rate" value="{{ old('buy_rate', $rate->buy_rate) }}" min="0" step="1" required placeholder="نرخ خرید">
                             </div>
-                            <div class="form-group" style="margin:0;">
-                              <label>فروش</label>
-                              <input type="number" name="sell_rate" value="{{ old('sell_rate', $rate->sell_rate) }}" min="0" step="1" required>
+                            <div class="price-box sell">
+                              <div class="label">نرخ فروش (تومان)</div>
+                              <input type="number" name="sell_rate" value="{{ old('sell_rate', $rate->sell_rate) }}" min="0" step="1" required placeholder="نرخ فروش">
                             </div>
-                            <button type="submit" class="btn btn-primary">ذخیره</button>
                           </div>
+                          <button type="submit" class="btn btn-primary btn-block">ذخیره تغییرات</button>
                         </form>
                       </td>
                     </tr>

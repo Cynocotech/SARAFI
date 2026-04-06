@@ -12,7 +12,9 @@ storage/framework/cache/data
 storage/framework/sessions
 storage/framework/views
 bootstrap/cache
+public/build
 .phpunit.cache
 .phpunit.result.cache
 tests
 .DS_Store
+*.md

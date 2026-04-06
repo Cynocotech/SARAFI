@@ -5,37 +5,52 @@
           <div style="background: var(--success); color: white; padding: 0.75rem 1rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.9rem;">{{ session('success') }}</div>
         @endif
         @if(isset($subscriptionActive) && !$subscriptionActive)
-          <div class="subscription-alert" style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.35); color: var(--danger); padding: 0.75rem 1rem; border-radius: var(--radius); margin-bottom: 1rem; font-size: 0.9rem;">
-            <strong>اشتراک شما فعال نیست.</strong> برای فعال‌سازی حساب لطفاً اشتراک را تهیه یا تمدید کنید.
-            <a href="{{ route('dashboard.subscription') }}" style="color: inherit; font-weight: 700; text-decoration: underline; margin-right: 0.5rem;">رفتن به صفحه اشتراک</a>
+          <div class="subscription-alert">
+            <span><strong>اشتراک شما فعال نیست.</strong> برای فعال‌سازی حساب لطفاً اشتراک را تهیه یا تمدید کنید.</span>
+            <a href="{{ route('dashboard.subscription') }}" style="color: inherit; font-weight: 700; text-decoration: underline; white-space: nowrap;">رفتن به صفحه اشتراک</a>
           </div>
         @endif
         <div class="stats-row">
+          <div class="stat-card {{ isset($subscriptionActive) && $subscriptionActive ? 'stat-card--success' : (isset($subscriptionActive) ? 'stat-card--danger' : '') }}">
+            <div class="stat-card-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-label">وضعیت اشتراک</div>
+              @if(isset($subscriptionActive))
+                <div class="stat-value">{{ $subscriptionActive ? 'فعال' : 'غیرفعال' }}</div>
+                @if($planName)
+                  <div class="stat-sublabel">{{ $planName }}</div>
+                @endif
+                @if($subscriptionActive && $subscriptionDaysRemaining !== null)
+                  <div class="stat-sublabel">{{ farsi_num($subscriptionDaysRemaining) }} روز باقی‌مانده</div>
+                @elseif($subscriptionActive && $subscriptionDaysRemaining === null)
+                  <div class="stat-sublabel">تخصیص ادمین</div>
+                @endif
+              @else
+                <div class="stat-value">—</div>
+              @endif
+            </div>
+          </div>
           <div class="stat-card">
-            @if(isset($subscriptionActive))
-              <div class="stat-value" style="{{ $subscriptionActive ? 'color: var(--success);' : 'color: var(--danger);' }}">
-                {{ $subscriptionActive ? 'فعال' : 'غیرفعال' }}
-              </div>
-              @if($planName)
-                <div class="stat-sublabel" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.25rem;">{{ $planName }}</div>
-              @endif
-              @if($subscriptionActive && $subscriptionDaysRemaining !== null)
-                <div class="stat-sublabel" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.15rem;">{{ farsi_num($subscriptionDaysRemaining) }} روز باقی‌مانده</div>
-              @elseif($subscriptionActive && $subscriptionDaysRemaining === null)
-                <div class="stat-sublabel" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.15rem;">تخصیص ادمین</div>
-              @endif
-            @else
+            <div class="stat-card-icon stat-card-icon--buy" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-label">نرخ خرید پوند</div>
               <div class="stat-value">—</div>
-            @endif
-            <div class="stat-label">وضعیت اشتراک</div>
+              <div class="stat-sublabel">تومان</div>
+            </div>
           </div>
           <div class="stat-card">
-            <div class="stat-value">—</div>
-            <div class="stat-label">نرخ خرید پوند به تومان</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value">—</div>
-            <div class="stat-label">نرخ فروش پوند به تومان</div>
+            <div class="stat-card-icon stat-card-icon--sell" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+            </div>
+            <div class="stat-card-body">
+              <div class="stat-label">نرخ فروش پوند</div>
+              <div class="stat-value">—</div>
+              <div class="stat-sublabel">تومان</div>
+            </div>
           </div>
         </div>
 

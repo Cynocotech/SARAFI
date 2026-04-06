@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DigitalSignageScreen;
 use App\Models\Setting;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -12,7 +13,7 @@ use Illuminate\View\View;
 
 class SignageDisplayController extends Controller
 {
-    private const COINGECKO_IDS = ['bitcoin', 'ethereum', 'tether', 'solana', 'ripple'];
+    private const COINGECKO_IDS = ['bitcoin', 'ethereum', 'tether'];
     private const COINGECKO_CACHE_KEY = 'signage_crypto_rates';
     private const COINGECKO_CACHE_TTL_SECONDS = 120;
 
@@ -103,22 +104,16 @@ class SignageDisplayController extends Controller
                 'bitcoin' => 'بیت‌کوین (BTC)',
                 'ethereum' => 'اتریوم (ETH)',
                 'tether' => 'تتر (USDT)',
-                'solana' => 'سولانا (SOL)',
-                'ripple' => 'ریپل (XRP)',
             ];
             $symbols = [
                 'bitcoin' => 'BTC',
                 'ethereum' => 'ETH',
                 'tether' => 'USDT',
-                'solana' => 'SOL',
-                'ripple' => 'XRP',
             ];
             $iconIds = [
                 'bitcoin' => 1,
                 'ethereum' => 279,
                 'tether' => 325,
-                'solana' => 6316,
-                'ripple' => 52,
             ];
 
             $list = [];
@@ -142,5 +137,16 @@ class SignageDisplayController extends Controller
 
             return $list;
         });
+    }
+
+    public function reportSize(Request $request, string $token): JsonResponse
+    {
+        $screen = DigitalSignageScreen::where('token', $token)->firstOrFail();
+        $validated = $request->validate([
+            'resolution' => ['required', 'string', 'max:20', 'regex:/^\d+x\d+$/'],
+        ]);
+        $screen->update(['last_seen_resolution' => $validated['resolution']]);
+
+        return response()->json(['ok' => true]);
     }
 }

@@ -40,9 +40,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        FilamentView::registerRenderHook(PanelsRenderHook::HEAD_END, function (): string {
-            return '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">';
-        });
+        // Fonts are loaded locally via public/css/fonts.css injected in AdminPanelProvider
 
         View::composer(['exchanges.index', 'guide', 'contact'], function ($view) {
             $navItems = Setting::get('nav_items');

@@ -1,4 +1,9 @@
 /* Admin sidebar: always dark with white text. Loaded via Filament STYLES_AFTER. */
+
+/* Force Yekan Bakh font across the entire admin panel */
+body, .fi-body, [class*="fi-"] {
+  font-family: 'Yekan Bakh', 'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif !important;
+}
 body .fi-main-sidebar,
 #admin .fi-main-sidebar,
 .fi-main-sidebar.fi-sidebar {

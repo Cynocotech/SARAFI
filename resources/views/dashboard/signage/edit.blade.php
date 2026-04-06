@@ -5,6 +5,12 @@
 @section('content')
         <div class="dash-card">
           <p style="margin-bottom:1rem;">کد pairing: <strong>{{ $screen->pairing_code }}</strong></p>
+          @if($screen->last_seen_resolution)
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1.25rem;padding:0.6rem 1rem;background:var(--accent-soft);border-radius:var(--radius);font-size:0.85rem;color:var(--accent);">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span>اندازه صفحه شناسایی‌شده: <strong>{{ $screen->last_seen_resolution }}</strong></span>
+            </div>
+          @endif
           <form action="{{ route('dashboard.signage.update', $screen) }}" method="POST" enctype="multipart/form-data" class="onboarding-form">
             @csrf
             @method('PUT')
@@ -29,6 +35,21 @@
               <label for="background_image">@if($screen->background_image_path) جایگزین تصویر @else تصویر پس‌زمینه (اختیاری) @endif</label>
               <input type="file" id="background_image" name="background_image" accept="image/jpeg,image/png,image/gif,image/webp" class="form-control">
             </div>
+
+            <div class="form-group">
+              <label>چرخش صفحه نمایش</label>
+              <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">اگر تلویزیون به صورت عمودی (پرتره) نصب شده، ۹۰ یا ۲۷۰ درجه را انتخاب کنید.</p>
+              @php $currentRotation = old('rotation', $screen->rotation ?? 0); @endphp
+              <div style="display:flex;flex-wrap:wrap;gap:0.65rem;">
+                @foreach([0 => '۰° (افقی)', 90 => '۹۰° (چپ)', 180 => '۱۸۰° (وارونه)', 270 => '۲۷۰° (راست)'] as $deg => $label)
+                  <label class="rate-radio-label">
+                    <input type="radio" name="rotation" value="{{ $deg }}" {{ (int)$currentRotation === $deg ? 'checked' : '' }}>
+                    <span>{{ $label }}</span>
+                  </label>
+                @endforeach
+              </div>
+            </div>
+
             <div class="form-group">
               <label class="toggle-label" for="crypto_enabled">
                 <span class="toggle-switch">

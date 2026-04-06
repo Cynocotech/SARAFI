@@ -18,12 +18,15 @@ class DigitalSignageScreen extends Model
         'background_image_path',
         'crypto_enabled',
         'qr_link',
+        'rotation',
+        'last_seen_resolution',
         'settings',
     ];
 
     protected $casts = [
         'settings' => 'array',
         'crypto_enabled' => 'boolean',
+        'rotation' => 'integer',
     ];
 
     protected static function booted(): void

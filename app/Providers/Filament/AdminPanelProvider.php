@@ -31,17 +31,16 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('آقای صرافی')
-            ->font('Yekan Bakh')
+            ->font('Yekan Bakh', url: asset('css/fonts.css'))
             ->darkMode(false)
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->renderHook(PanelsRenderHook::STYLES_AFTER, function () {
+                $fontsUrl = asset('css/fonts.css');
                 $url = asset('css/admin-sidebar-dark.css');
-                // Admin font (Yekan Bakh)
-                $yekan = '<link href="https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh.css" rel="stylesheet">';
 
-                return $yekan.'<link rel="stylesheet" href="'.$url.'">'.view('filament.components.admin-sidebar-dark')->render();
+                return '<link rel="stylesheet" href="'.$fontsUrl.'"><link rel="stylesheet" href="'.$url.'">'.view('filament.components.admin-sidebar-dark')->render();
             })
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

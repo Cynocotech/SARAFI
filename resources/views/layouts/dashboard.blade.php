@@ -6,9 +6,7 @@
   <meta name="theme-color" content="#f0f9ff">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'پنل مدیریت')</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('css/fonts.css') }}">
   <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
   <link rel="stylesheet" href="{{ asset('css/dashboard-extra.css') }}">
   @stack('styles')
@@ -18,6 +16,7 @@
     @auth('exchange')
     @include('partials.dashboard-sidebar')
     @endauth
+    @include('partials.dashboard-bottom-nav')
     <div class="dashboard-body">
       @include('partials.dashboard-nav', [
         'nav_title' => trim($__env->yieldContent('dashboard_nav_title')) ?: 'پنل مدیریت',

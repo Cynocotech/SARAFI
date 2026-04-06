@@ -3,9 +3,7 @@
 @section('meta_description', Str::limit(strip_tags($exchangeOffice->about ?? $exchangeOffice->name . ' - نرخ خرید و فروش ارز'), 160))
 
 @section('styles')
-  <link rel="preconnect" href="https://cdn.fontcdn.ir">
-  <link href="https://cdn.fontcdn.ir/Font/Persian/YekanBakh/YekanBakh.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  {{-- fonts loaded locally via layouts/app.blade.php fonts.css --}}
   <link rel="stylesheet" href="{{ asset('css/theme2-landing.css') }}">
 @endsection
 

@@ -44,6 +44,7 @@ Route::get('/contact', [PageController::class, 'contact'])->name('contact');
 Route::get('/tv', fn () => redirect()->route('signage.setup'))->name('signage.tv');
 Route::get('/signage-setup', [SignageDisplayController::class, 'setup'])->name('signage.setup');
 Route::get('/signage/{token}', [SignageDisplayController::class, 'show'])->name('signage.display');
+Route::post('/signage/{token}/report-size', [SignageDisplayController::class, 'reportSize'])->name('signage.report-size');
 
 // Exchange login (public)
 Route::middleware(['web'])->prefix('exchange')->name('exchange.')->group(function () {
