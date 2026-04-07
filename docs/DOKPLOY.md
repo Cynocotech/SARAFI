@@ -1,80 +1,56 @@
-# Deploy on Dokploy (Docker + SQLite)
+# Deploy on Dokploy (React + Node)
 
-This app ships with a production-ready **Dockerfile** (PHP 8.3-FPM + Nginx + Supervisor + queue worker + scheduler loop). It is designed to run on Dokploy as a single app service.
+This repository now deploys as two services:
 
-## 1. Create application in Dokploy
+- `frontend` (React SPA on `ex.iraniu.uk`)
+- `api` (Node/Express on `api.ex.iraniu.uk`)
 
-1. Open **Dokploy** → **Applications** → **Create**.
-2. Choose **Git** (recommended) or upload/build context.
-3. **Build type**: Dockerfile (default path `Dockerfile` at repo root).
-4. **Port**: container exposes **80**. Attach your domain/reverse proxy in Dokploy.
+## 1. Create services in Dokploy
+
+1. Open Dokploy -> Applications -> Create.
+2. Use Docker Compose and point to `docker-compose.yml`.
+3. Configure domains:
+   - `frontend` service -> `ex.iraniu.uk`
+   - `api` service -> `api.ex.iraniu.uk`
 
 ## 2. Environment variables
 
-Add these in the app **Environment** tab (adjust values):
+Use `docs/dokploy.env.example` as baseline.
 
-| Variable | Example | Notes |
-|----------|---------|--------|
-| `APP_NAME` | `AghasSarafi` | |
-| `APP_ENV` | `production` | |
-| `APP_DEBUG` | `false` | |
-| `APP_KEY` | `base64:...` | Generate: `php artisan key:generate --show` |
-| `APP_URL` | `https://your-domain.com` | Must match public URL (HTTPS) |
-| `DB_CONNECTION` | `sqlite` | Default and recommended |
-| `DB_DATABASE` | `/var/www/html/database/database.sqlite` | Persist this path with a volume |
-| `SESSION_DRIVER` | `database` | Already default in `.env.example` |
-| `CACHE_STORE` | `database` | |
-| `QUEUE_CONNECTION` | `database` | Queue worker runs inside the container |
-| `RUN_MIGRATIONS` | `true` | Keep `true` for single replica deployments |
+Required values:
 
-Optional: Stripe keys, mail settings, etc. (see `.env.example`).
+- `FRONTEND_URL=https://ex.iraniu.uk`
+- `API_URL=https://api.ex.iraniu.uk`
+- `CORS_ORIGIN=https://ex.iraniu.uk`
 
-You can copy from `docs/dokploy.env.example` for a Dokploy-ready baseline (`APP_URL` and `SESSION_DOMAIN` are already set for `ex.iraniu.uk`).
+## 3. Persistent storage
 
-## 3. Persistent storage (required)
+Attach a volume to the API service:
 
-Attach Dokploy volumes:
+- `/app/data` -> persists SQLite database (`exchange.sqlite`)
 
-- `/var/www/html/database` (SQLite file persistence)
-- `/var/www/html/storage/app` (uploaded files such as logos)
+## 4. Health checks
 
-Without the database volume, data will reset on redeploy.
+- Frontend: `/`
+- API: `/health`
 
-## 4. First deploy
+## 5. First deploy
 
-On startup, the container entrypoint:
+Run compose deploy and verify:
 
-1. ensures `database.sqlite` exists,
-2. runs `php artisan storage:link`,
-3. runs `php artisan migrate --force` (when `RUN_MIGRATIONS=true`),
-4. caches config/routes/views/events (when `APP_ENV=production`),
-5. starts Nginx + PHP-FPM + queue worker + scheduler.
+1. `GET https://api.ex.iraniu.uk/health` returns `{ "ok": true }`
+2. `GET https://api.ex.iraniu.uk/api/exchanges` returns JSON list
+3. `https://ex.iraniu.uk` renders React app
 
-## 5. Docker Compose on Dokploy (optional)
+## 6. Cutover checklist
 
-Alternatively use **Docker Compose** in Dokploy:
-
-- Point compose to `docker-compose.yml` in the repo.
-- Set `APP_KEY` and any optional secrets in Dokploy env.
-- Expose the `app` service port **80**.
-- Keep the same two persistent volume mounts used above.
-
-## 6. Health check
-
-Laravel registers **`GET /up`** (see `bootstrap/app.php`). In Dokploy you can set the health check path to `/up`.
-
-## 7. Scaling note
-
-If you run multiple replicas, each replica will run queue and scheduler. For most Laravel apps, use **1 replica** unless you intentionally design for multi-replica workers/scheduling.
-
----
-
-## Local test
-
-```bash
-cp .env.example .env
-# Set APP_KEY and APP_URL
-docker compose up --build
-```
-
-Open `http://localhost:8080` (see `docker-compose.yml` ports).
+1. Deploy `api` first and validate `/health`.
+2. Deploy `frontend` with `VITE_API_URL=https://api.ex.iraniu.uk`.
+3. Update DNS:
+   - `ex.iraniu.uk` -> frontend service
+   - `api.ex.iraniu.uk` -> api service
+4. Smoke test:
+   - exchange list page
+   - exchange details page
+   - create/list rates through API
+5. Disable old Laravel/PHP Dokploy app once traffic is stable.
