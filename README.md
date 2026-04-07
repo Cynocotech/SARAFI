@@ -47,6 +47,20 @@ Laravel 12 backend with Filament admin, optional Stripe Identity (KYC), and publ
    ```
    This links `public/storage` → `storage/app/public`. Logos are stored under `storage/app/public/exchange-logos/`.
 
+## Dokploy deployment
+
+This project is containerized and ready for Dokploy:
+
+- Build from the repo `Dockerfile`
+- Expose container port `80`
+- Set required env vars (`APP_KEY`, `APP_URL`, and defaults from `.env.example`)
+- Attach persistent volumes:
+  - `/var/www/html/database`
+  - `/var/www/html/storage/app`
+- Set health check path to `/up`
+
+Full guide: `docs/DOKPLOY.md`
+
 ## Routes
 
 | Route | Description |

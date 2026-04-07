@@ -1,23 +1,15 @@
-# Deploy on Dokploy (Docker + MySQL)
+# Deploy on Dokploy (Docker + SQLite)
 
-This app ships with a **Dockerfile** (PHP 8.3-FPM + Nginx + Supervisor + queue worker) and a sample **`docker-compose.yml`** with MySQL 8.
+This app ships with a production-ready **Dockerfile** (PHP 8.3-FPM + Nginx + Supervisor + queue worker + scheduler loop). It is designed to run on Dokploy as a single app service.
 
-## 1. Database (MySQL)
-
-Create a MySQL database and user (Dokploy **Database** resource, or compose `mysql` service, or external managed MySQL). Note:
-
-- Hostname (e.g. `mysql` if same compose network, or the hostname Dokploy shows)
-- Port (usually `3306`)
-- Database name, username, password
-
-## 2. New application in Dokploy
+## 1. Create application in Dokploy
 
 1. Open **Dokploy** → **Applications** → **Create**.
 2. Choose **Git** (recommended) or upload/build context.
 3. **Build type**: Dockerfile (default path `Dockerfile` at repo root).
-4. **Port**: container exposes **80** → map to your public port / domain (Dokploy usually sets reverse proxy to the container).
+4. **Port**: container exposes **80**. Attach your domain/reverse proxy in Dokploy.
 
-## 3. Environment variables
+## 2. Environment variables
 
 Add these in the app **Environment** tab (adjust values):
 
@@ -28,57 +20,60 @@ Add these in the app **Environment** tab (adjust values):
 | `APP_DEBUG` | `false` | |
 | `APP_KEY` | `base64:...` | Generate: `php artisan key:generate --show` |
 | `APP_URL` | `https://your-domain.com` | Must match public URL (HTTPS) |
-| `DB_CONNECTION` | `mysql` | |
-| `DB_HOST` | `mysql` or host from Dokploy DB | |
-| `DB_PORT` | `3306` | |
-| `DB_DATABASE` | your DB name | |
-| `DB_USERNAME` | your DB user | |
-| `DB_PASSWORD` | your DB password | |
+| `DB_CONNECTION` | `sqlite` | Default and recommended |
+| `DB_DATABASE` | `/var/www/html/database/database.sqlite` | Persist this path with a volume |
 | `SESSION_DRIVER` | `database` | Already default in `.env.example` |
 | `CACHE_STORE` | `database` | |
 | `QUEUE_CONNECTION` | `database` | Queue worker runs inside the container |
-| `RUN_MIGRATIONS` | `true` | Set `false` on extra replicas after first deploy |
+| `RUN_MIGRATIONS` | `true` | Keep `true` for single replica deployments |
 
 Optional: Stripe keys, mail settings, etc. (see `.env.example`).
 
-## 4. Persistent storage (uploads / `storage/app`)
+You can copy from `docs/dokploy.env.example` for a Dokploy-ready baseline (`APP_URL` and `SESSION_DOMAIN` are already set for `ex.iraniu.uk`).
 
-The image is stateless. For **logos and file uploads**, attach a **volume** in Dokploy to:
+## 3. Persistent storage (required)
 
-`/var/www/html/storage/app`
+Attach Dokploy volumes:
 
-(Keep `storage/logs` ephemeral or add another volume if you need log retention.)
+- `/var/www/html/database` (SQLite file persistence)
+- `/var/www/html/storage/app` (uploaded files such as logos)
 
-## 5. First deploy
+Without the database volume, data will reset on redeploy.
 
-- Ensure the database is empty or run `php artisan migrate:fresh` only if you intend to wipe data.
-- The container **entrypoint** waits for MySQL, runs `php artisan migrate --force`, `storage:link`, and `php artisan optimize` when `APP_ENV=production`.
+## 4. First deploy
 
-## 6. Docker Compose on Dokploy
+On startup, the container entrypoint:
+
+1. ensures `database.sqlite` exists,
+2. runs `php artisan storage:link`,
+3. runs `php artisan migrate --force` (when `RUN_MIGRATIONS=true`),
+4. caches config/routes/views/events (when `APP_ENV=production`),
+5. starts Nginx + PHP-FPM + queue worker + scheduler.
+
+## 5. Docker Compose on Dokploy (optional)
 
 Alternatively use **Docker Compose** in Dokploy:
 
 - Point compose to `docker-compose.yml` in the repo.
-- Set `APP_KEY` and DB passwords in Dokploy env or an env file.
+- Set `APP_KEY` and any optional secrets in Dokploy env.
 - Expose the `app` service port **80**.
+- Keep the same two persistent volume mounts used above.
 
-## 7. Health check
+## 6. Health check
 
 Laravel registers **`GET /up`** (see `bootstrap/app.php`). In Dokploy you can set the health check path to `/up`.
 
-## 8. Scheduler (optional)
+## 7. Scaling note
 
-This image does not run `schedule:work`. If you use scheduled tasks, add a **cron** or a second Dokploy service:
-
-`php /var/www/html/artisan schedule:work`
+If you run multiple replicas, each replica will run queue and scheduler. For most Laravel apps, use **1 replica** unless you intentionally design for multi-replica workers/scheduling.
 
 ---
 
-**Local test**
+## Local test
 
 ```bash
 cp .env.example .env
-# Set APP_KEY, DB_* or use compose defaults
+# Set APP_KEY and APP_URL
 docker compose up --build
 ```
 
